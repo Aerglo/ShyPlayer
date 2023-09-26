@@ -27,3 +27,12 @@ class PlayFetchFailedState extends PlayState {}
 class MusicChangedState extends PlayState {}
 
 class NavigateToPlayPageState extends PlayActionState {}
+
+class NextIndexState extends PlayState {
+  final SongModel songModel;
+  NextIndexState({required this.songModel});
+}
+
+class PlayLoadingState extends PlayState {}
+
+class CurrentMusicChangedState extends PlayActionState {}

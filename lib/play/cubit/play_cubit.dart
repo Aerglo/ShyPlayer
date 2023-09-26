@@ -15,7 +15,9 @@ class PlayCubit extends Cubit<PlayState> {
   AudioPlayer audioPlayer;
   Widget? artwork;
   Duration progress = Duration.zero;
-  Duration total = Duration(seconds: 20);
+  Duration total = Duration.zero;
+  Size size = Size(100, 100);
+  late ColorScheme colorScheme;
   PlayCubit({required this.audioPlayer}) : super(PlayInitial());
   void initialFetch() async {
     emit(PlayFetchLoadingState());
@@ -38,8 +40,12 @@ class PlayCubit extends Cubit<PlayState> {
     ));
   }
 
-  void musicTileTapped(SongModel songModel, int index, List<SongModel> songList,
-      BuildContext context) {
+  void musicTileTapped(
+    SongModel songModel,
+    int index,
+    List<SongModel> songList,
+    BuildContext context,
+  ) async {
     this.songModel = songModel;
     emit(PlayFetchSucceedState(
       songList: songList,
@@ -47,31 +53,97 @@ class PlayCubit extends Cubit<PlayState> {
       albumList: albumList,
       artistList: artistList,
     ));
+    List<AudioSource> sources = getAllSources(songList);
+    final ConcatenatingAudioSource playlist = ConcatenatingAudioSource(
+      children: sources,
+    );
+    await audioPlayer.setAudioSource(
+      playlist,
+      initialIndex: index,
+      initialPosition: Duration.zero,
+    );
+    audioPlayer.play();
+
+    audioPlayer.positionStream.listen((event) {
+      progress = event;
+      emit(MusicChangedState());
+    });
+    audioPlayer.durationStream.listen((event) {
+      total = event ?? Duration.zero;
+      emit(MusicChangedState());
+    });
+    audioPlayer.currentIndexStream.listen((event) {
+      this.index = event ?? -1;
+      songModel = songList[this.index];
+      artwork = getArtwork(size, colorScheme);
+      emit(CurrentMusicChangedState());
+    });
+
+    if (context.mounted) {
+      size = MediaQuery.sizeOf(context);
+      colorScheme = Theme.of(context).colorScheme;
+      artwork = getArtwork(size, colorScheme);
+    }
     emit(NavigateToPlayPageState());
-    artwork = getArtwork(context);
   }
 
-  Widget getArtwork(BuildContext context) {
-    return QueryArtworkWidget(
-      id: songModel!.id,
-      type: ArtworkType.AUDIO,
-      size: 500,
-      quality: 100,
-      format: ArtworkFormat.PNG,
-      artworkHeight: MediaQuery.sizeOf(context).width * 0.8,
-      artworkWidth: MediaQuery.sizeOf(context).width * 0.8,
-      nullArtworkWidget: Container(
-        height: MediaQuery.sizeOf(context).width * 0.8,
-        width: MediaQuery.sizeOf(context).width * 0.8,
+  void pauseAndPlay() async {
+    if (audioPlayer.playing) {
+      await audioPlayer.pause();
+    } else {
+      await audioPlayer.play();
+    }
+    emit(MusicChangedState());
+  }
+
+  void seekDuration(Duration position) {
+    audioPlayer.seek(position);
+  }
+
+  Widget getArtwork(Size size, ColorScheme colorScheme) {
+    if (songModel != null) {
+      return QueryArtworkWidget(
+        id: songModel!.id,
+        type: ArtworkType.AUDIO,
+        size: 500,
+        quality: 100,
+        format: ArtworkFormat.PNG,
+        artworkHeight: size.width * 0.8,
+        artworkWidth: size.width * 0.8,
+        nullArtworkWidget: Container(
+          height: size.width * 0.8,
+          width: size.width * 0.8,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(50),
+            color: colorScheme.onBackground,
+          ),
+          child: Icon(
+            Icons.music_note,
+            color: colorScheme.secondary,
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        height: size.width * 0.8,
+        width: size.width * 0.8,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(50),
-          color: Theme.of(context).colorScheme.onBackground,
+          color: colorScheme.onBackground,
         ),
         child: Icon(
           Icons.music_note,
-          color: Theme.of(context).colorScheme.secondary,
+          color: colorScheme.secondary,
         ),
-      ),
-    );
+      );
+    }
   }
+}
+
+List<AudioSource> getAllSources(List<SongModel> songList) {
+  List<AudioSource> uris = [];
+  for (SongModel songModel in songList) {
+    uris.add(AudioSource.uri(Uri.parse(songModel.uri!)));
+  }
+  return uris;
 }
