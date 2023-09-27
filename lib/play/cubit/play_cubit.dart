@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
@@ -16,7 +18,6 @@ class PlayCubit extends Cubit<PlayState> {
   Widget? artwork;
   Duration progress = Duration.zero;
   Duration total = Duration.zero;
-  Size size = Size(100, 100);
   late ColorScheme colorScheme;
   PlayCubit({required this.audioPlayer}) : super(PlayInitial());
   void initialFetch() async {
@@ -66,24 +67,22 @@ class PlayCubit extends Cubit<PlayState> {
 
     audioPlayer.positionStream.listen((event) {
       progress = event;
-      emit(MusicChangedState());
+      emit(DurationChangedState());
     });
     audioPlayer.durationStream.listen((event) {
       total = event ?? Duration.zero;
-      emit(MusicChangedState());
+      emit(DurationChangedState());
     });
     audioPlayer.currentIndexStream.listen((event) {
       this.index = event ?? -1;
+      log(songModel.title);
       songModel = songList[this.index];
-      artwork = getArtwork(size, colorScheme);
-      emit(CurrentMusicChangedState());
+      log(songModel.title);
+      emit(MusicChangedState(
+        songModel: songModel,
+      ));
     });
 
-    if (context.mounted) {
-      size = MediaQuery.sizeOf(context);
-      colorScheme = Theme.of(context).colorScheme;
-      artwork = getArtwork(size, colorScheme);
-    }
     emit(NavigateToPlayPageState());
   }
 
@@ -93,50 +92,29 @@ class PlayCubit extends Cubit<PlayState> {
     } else {
       await audioPlayer.play();
     }
-    emit(MusicChangedState());
+    emit(DurationChangedState());
   }
 
   void seekDuration(Duration position) {
     audioPlayer.seek(position);
+    emit(DurationChangedState());
   }
 
-  Widget getArtwork(Size size, ColorScheme colorScheme) {
-    if (songModel != null) {
-      return QueryArtworkWidget(
-        id: songModel!.id,
-        type: ArtworkType.AUDIO,
-        size: 500,
-        quality: 100,
-        format: ArtworkFormat.PNG,
-        artworkHeight: size.width * 0.8,
-        artworkWidth: size.width * 0.8,
-        nullArtworkWidget: Container(
-          height: size.width * 0.8,
-          width: size.width * 0.8,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(50),
-            color: colorScheme.onBackground,
-          ),
-          child: Icon(
-            Icons.music_note,
-            color: colorScheme.secondary,
-          ),
-        ),
-      );
-    } else {
-      return Container(
-        height: size.width * 0.8,
-        width: size.width * 0.8,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(50),
-          color: colorScheme.onBackground,
-        ),
-        child: Icon(
-          Icons.music_note,
-          color: colorScheme.secondary,
-        ),
-      );
-    }
+  void seekToStart() {
+    audioPlayer.seek(Duration.zero);
+    emit(DurationChangedState());
+  }
+
+  void seekToPreviousSong() async {
+    songModel = songList[--index];
+    await audioPlayer.seekToPrevious();
+    emit(DurationChangedState());
+  }
+
+  void seekToNextSong() async {
+    songModel = songList[++index];
+    await audioPlayer.seekToNext();
+    emit(DurationChangedState());
   }
 }
 

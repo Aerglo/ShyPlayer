@@ -15,7 +15,7 @@ class Song extends StatelessWidget {
           case NavigateToPlayPageState:
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => Play(),
+                builder: (context) => const Play(),
               ),
             );
         }

@@ -24,15 +24,15 @@ class PlayFetchSucceedState extends PlayState {
 
 class PlayFetchFailedState extends PlayState {}
 
-class MusicChangedState extends PlayState {}
+class DurationChangedState extends PlayState {}
 
 class NavigateToPlayPageState extends PlayActionState {}
 
-class NextIndexState extends PlayState {
+class MusicChangedState extends PlayActionState {
   final SongModel songModel;
-  NextIndexState({required this.songModel});
+  MusicChangedState({
+    required this.songModel,
+  });
 }
 
 class PlayLoadingState extends PlayState {}
-
-class CurrentMusicChangedState extends PlayActionState {}
