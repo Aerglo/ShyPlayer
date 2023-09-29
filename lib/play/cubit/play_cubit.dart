@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
@@ -12,14 +10,16 @@ class PlayCubit extends Cubit<PlayState> {
   List<ArtistModel> artistList = [];
   List<PlaylistModel> playlistList = [];
   List<AlbumModel> albumList = [];
+  LoopMode mode = LoopMode.off;
+  bool isShuffled = false;
   SongModel? songModel;
   int index = -1;
   AudioPlayer audioPlayer;
   Widget? artwork;
   Duration progress = Duration.zero;
   Duration total = Duration.zero;
-  late ColorScheme colorScheme;
   PlayCubit({required this.audioPlayer}) : super(PlayInitial());
+
   void initialFetch() async {
     emit(PlayFetchLoadingState());
     OnAudioQuery onAudioQuery = OnAudioQuery();
@@ -75,9 +75,7 @@ class PlayCubit extends Cubit<PlayState> {
     });
     audioPlayer.currentIndexStream.listen((event) {
       this.index = event ?? -1;
-      log(songModel.title);
       songModel = songList[this.index];
-      log(songModel.title);
       emit(MusicChangedState(
         songModel: songModel,
       ));
@@ -114,6 +112,25 @@ class PlayCubit extends Cubit<PlayState> {
   void seekToNextSong() async {
     songModel = songList[++index];
     await audioPlayer.seekToNext();
+    emit(DurationChangedState());
+  }
+
+  void changeLoopMode() {
+    if (mode == LoopMode.off) {
+      mode = LoopMode.all;
+    } else if (mode == LoopMode.all) {
+      mode = LoopMode.one;
+    } else {
+      mode = LoopMode.off;
+    }
+    audioPlayer.setLoopMode(mode);
+    emit(DurationChangedState());
+  }
+
+  void changeShuffle() {
+    isShuffled = !isShuffled;
+    audioPlayer.setShuffleModeEnabled(isShuffled);
+
     emit(DurationChangedState());
   }
 }

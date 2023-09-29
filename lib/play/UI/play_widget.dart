@@ -1,6 +1,7 @@
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:shy_player/play/cubit/play_cubit.dart';
 
@@ -125,6 +126,35 @@ Widget titleAndArtistBar(BuildContext context, SongModel songModel) {
   );
 }
 
+Widget repeatWidget(BuildContext context) {
+  ColorScheme colorScheme = Theme.of(context).colorScheme;
+  if (BlocProvider.of<PlayCubit>(context).mode == LoopMode.off) {
+    return IconButton(
+      onPressed: BlocProvider.of<PlayCubit>(context).changeLoopMode,
+      icon: Icon(
+        Icons.repeat_rounded,
+        color: colorScheme.secondary,
+      ),
+    );
+  } else if (BlocProvider.of<PlayCubit>(context).mode == LoopMode.all) {
+    return IconButton(
+      onPressed: BlocProvider.of<PlayCubit>(context).changeLoopMode,
+      icon: Icon(
+        Icons.repeat_rounded,
+        color: colorScheme.primary,
+      ),
+    );
+  } else {
+    return IconButton(
+      onPressed: BlocProvider.of<PlayCubit>(context).changeLoopMode,
+      icon: Icon(
+        Icons.repeat_one_rounded,
+        color: colorScheme.primary,
+      ),
+    );
+  }
+}
+
 Widget actionBar(BuildContext context) {
   Size size = MediaQuery.sizeOf(context);
   ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -140,18 +170,14 @@ Widget actionBar(BuildContext context) {
             color: colorScheme.secondary,
           ),
         ),
+        repeatWidget(context),
         IconButton(
-          onPressed: () {},
-          icon: Icon(
-            Icons.repeat_rounded,
-            color: colorScheme.secondary,
-          ),
-        ),
-        IconButton(
-          onPressed: () {},
+          onPressed: BlocProvider.of<PlayCubit>(context).changeShuffle,
           icon: Icon(
             Icons.shuffle_rounded,
-            color: colorScheme.secondary,
+            color: BlocProvider.of<PlayCubit>(context).isShuffled
+                ? colorScheme.primary
+                : colorScheme.secondary,
           ),
         ),
         IconButton(
