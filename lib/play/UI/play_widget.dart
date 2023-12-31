@@ -29,6 +29,8 @@ Widget playPage(BuildContext context, SongModel songModel) {
                 case MusicChangedState:
                   MusicChangedState newState = state as MusicChangedState;
                   return titleAndArtistBar(context, newState.songModel);
+                case RotationState:
+                  return titleAndArtistBar(context, songModel);
                 default:
                   return titleAndArtistBar(context, songModel);
               }
@@ -53,14 +55,6 @@ Widget playPage(BuildContext context, SongModel songModel) {
           ),
         ),
         const Expanded(child: SizedBox()),
-        Expanded(
-          child: BlocBuilder<PlayCubit, PlayState>(
-            builder: (context, state) {
-              return playPauseBar(context);
-            },
-          ),
-        ),
-        const Expanded(child: SizedBox()),
       ],
     ),
   );
@@ -69,26 +63,49 @@ Widget playPage(BuildContext context, SongModel songModel) {
 Widget artwork(SongModel songModel, BuildContext context) {
   Size size = MediaQuery.sizeOf(context);
   ColorScheme colorScheme = Theme.of(context).colorScheme;
-  return QueryArtworkWidget(
-    id: songModel.id,
-    type: ArtworkType.AUDIO,
-    size: 500,
-    quality: 100,
-    format: ArtworkFormat.PNG,
-    artworkHeight: size.width * 0.8,
-    artworkWidth: size.width * 0.8,
-    nullArtworkWidget: Container(
-      height: size.width * 0.8,
-      width: size.width * 0.8,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(50),
-        color: colorScheme.onBackground,
+  double turns = 0.0;
+  return Stack(
+    children: [
+      AnimatedRotation(
+        turns: BlocProvider.of<PlayCubit>(context).turns,
+        duration: const Duration(seconds: 1),
+        child: Center(
+          child: QueryArtworkWidget(
+            id: songModel.id,
+            type: ArtworkType.AUDIO,
+            size: 500,
+            quality: 100,
+            artworkBorder: BorderRadius.circular(size.width * 0.8),
+            format: ArtworkFormat.PNG,
+            artworkHeight: size.width * 0.8,
+            artworkWidth: size.width * 0.8,
+            nullArtworkWidget: Container(
+              height: size.width * 0.8,
+              width: size.width * 0.8,
+              decoration: BoxDecoration(
+                color: colorScheme.onBackground,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        ),
       ),
-      child: Icon(
-        Icons.music_note,
-        color: colorScheme.secondary,
+      Positioned(
+        top: size.width * 0.3,
+        left: size.width * 0.4,
+        child: Center(
+          child: Container(
+            alignment: Alignment.center,
+            height: size.width * 0.2,
+            width: size.width * 0.2,
+            decoration: BoxDecoration(
+              color: colorScheme.background.withOpacity(1),
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
       ),
-    ),
+    ],
   );
 }
 
@@ -110,15 +127,16 @@ Widget titleAndArtistBar(BuildContext context, SongModel songModel) {
             fontSize: 16,
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 20),
         Text(
-          songModel.artist ?? 'Unknown Artist',
+          '- ${songModel.artist} -' ?? '- Unknown Artist -',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
           style: TextStyle(
             color: colorScheme.secondary,
             fontSize: 12,
+
           ),
         ),
       ],
@@ -129,27 +147,51 @@ Widget titleAndArtistBar(BuildContext context, SongModel songModel) {
 Widget repeatWidget(BuildContext context) {
   ColorScheme colorScheme = Theme.of(context).colorScheme;
   if (BlocProvider.of<PlayCubit>(context).mode == LoopMode.off) {
-    return IconButton(
-      onPressed: BlocProvider.of<PlayCubit>(context).changeLoopMode,
-      icon: Icon(
-        Icons.repeat_rounded,
-        color: colorScheme.secondary,
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.onBackground,
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        onPressed: BlocProvider.of<PlayCubit>(context).changeLoopMode,
+        icon: Icon(
+          Icons.repeat_rounded,
+          color: colorScheme.secondary,
+          size: 25,
+        ),
       ),
     );
   } else if (BlocProvider.of<PlayCubit>(context).mode == LoopMode.all) {
-    return IconButton(
-      onPressed: BlocProvider.of<PlayCubit>(context).changeLoopMode,
-      icon: Icon(
-        Icons.repeat_rounded,
-        color: colorScheme.primary,
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.onBackground,
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        onPressed: BlocProvider.of<PlayCubit>(context).changeLoopMode,
+        icon: Icon(
+          Icons.repeat_rounded,
+          color: colorScheme.primary,
+          size: 25,
+        ),
       ),
     );
   } else {
-    return IconButton(
-      onPressed: BlocProvider.of<PlayCubit>(context).changeLoopMode,
-      icon: Icon(
-        Icons.repeat_one_rounded,
-        color: colorScheme.primary,
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.onBackground,
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        onPressed: BlocProvider.of<PlayCubit>(context).changeLoopMode,
+        icon: Icon(
+          Icons.repeat_one_rounded,
+          color: colorScheme.primary,
+          size: 25,
+        ),
       ),
     );
   }
@@ -163,28 +205,73 @@ Widget actionBar(BuildContext context) {
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        IconButton(
-          onPressed: () {},
-          icon: Icon(
-            Icons.favorite_border,
-            color: colorScheme.secondary,
+        Container(
+          height: 40,
+          width: 40,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.onBackground,
+            shape: BoxShape.circle,
+          ),
+          child: InkResponse(
+            onTap: BlocProvider.of<PlayCubit>(context).seekToStart,
+            onDoubleTap: BlocProvider.of<PlayCubit>(context).seekToPreviousSong,
+            child: Icon(
+              Icons.skip_previous_rounded,
+              color: colorScheme.secondary,
+              size: 20,
+            ),
           ),
         ),
         repeatWidget(context),
-        IconButton(
-          onPressed: BlocProvider.of<PlayCubit>(context).changeShuffle,
-          icon: Icon(
-            Icons.shuffle_rounded,
-            color: BlocProvider.of<PlayCubit>(context).isShuffled
-                ? colorScheme.primary
-                : colorScheme.secondary,
+        Container(
+          height: 60,
+          width: 60,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.onBackground,
+            shape: BoxShape.circle,
+          ),
+          child: InkResponse(
+            onTap: BlocProvider.of<PlayCubit>(context).pauseAndPlay,
+            child: Icon(
+              BlocProvider.of<PlayCubit>(context).audioPlayer.playing
+                  ? Icons.pause
+                  : Icons.play_arrow_rounded,
+              color: colorScheme.secondary,
+              size: 30,
+            ),
           ),
         ),
-        IconButton(
-          onPressed: () {},
-          icon: Icon(
-            Icons.add,
-            color: colorScheme.secondary,
+        Container(
+          height: 50,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.onBackground,
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            onPressed: BlocProvider.of<PlayCubit>(context).changeShuffle,
+            icon: Icon(
+              Icons.shuffle_rounded,
+              color: BlocProvider.of<PlayCubit>(context).isShuffled
+                  ? colorScheme.primary
+                  : colorScheme.secondary,
+              size: 25,
+            ),
+          ),
+        ),
+        Container(
+          height: 40,
+          width: 40,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.onBackground,
+            shape: BoxShape.circle,
+          ),
+          child: InkResponse(
+            onTap: BlocProvider.of<PlayCubit>(context).seekToNextSong,
+            child: Icon(
+              Icons.skip_next_rounded,
+              color: colorScheme.secondary,
+              size: 20,
+            ),
           ),
         ),
       ],
@@ -209,43 +296,6 @@ Widget progressBar(BuildContext context) {
       timeLabelTextStyle: TextStyle(
         color: colorScheme.secondary,
       ),
-    ),
-  );
-}
-
-Widget playPauseBar(BuildContext context) {
-  Size size = MediaQuery.sizeOf(context);
-  ColorScheme colorScheme = Theme.of(context).colorScheme;
-  return SizedBox(
-    width: size.width * 0.8,
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        InkResponse(
-          onTap: BlocProvider.of<PlayCubit>(context).seekToStart,
-          onDoubleTap: BlocProvider.of<PlayCubit>(context).seekToPreviousSong,
-          child: Icon(
-            Icons.skip_previous_rounded,
-            color: colorScheme.secondary,
-          ),
-        ),
-        InkResponse(
-          onTap: BlocProvider.of<PlayCubit>(context).pauseAndPlay,
-          child: Icon(
-            BlocProvider.of<PlayCubit>(context).audioPlayer.playing
-                ? Icons.pause
-                : Icons.play_arrow_rounded,
-            color: colorScheme.secondary,
-          ),
-        ),
-        InkResponse(
-          onTap: BlocProvider.of<PlayCubit>(context).seekToNextSong,
-          child: Icon(
-            Icons.skip_next_rounded,
-            color: colorScheme.secondary,
-          ),
-        ),
-      ],
     ),
   );
 }

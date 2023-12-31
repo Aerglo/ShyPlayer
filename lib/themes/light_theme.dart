@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 ThemeData lightTheme = ThemeData(
+  fontFamily: 'segoe',
   colorScheme: ColorScheme(
     brightness: Brightness.light,
     primary: Colors.blue.shade900,

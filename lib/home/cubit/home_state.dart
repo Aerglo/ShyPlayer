@@ -10,3 +10,5 @@ class HomeBottomNavigationBarChangedState extends HomeState {}
 class HomeLoadingState extends HomeState {}
 
 class HomeThemeChanged extends HomeState {}
+
+class HomeMusicChanged extends HomeState {}

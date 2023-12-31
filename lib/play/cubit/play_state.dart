@@ -35,4 +35,10 @@ class MusicChangedState extends PlayActionState {
   });
 }
 
+class RotationState extends PlayActionState {}
+
 class PlayLoadingState extends PlayState {}
+
+class PlayPopButtonTappedState extends PlayActionState {}
+
+class PlayPauseState extends PlayState {}
