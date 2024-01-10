@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:shy_player/home/UI/album.dart';
 import 'package:shy_player/home/UI/artist.dart';
 import 'package:shy_player/home/UI/home_widgets.dart';
-import 'package:shy_player/home/UI/playlist.dart';
 import 'package:shy_player/home/UI/song.dart';
 import 'package:shy_player/home/cubit/home_cubit.dart';
 import 'package:shy_player/play/cubit/play_cubit.dart';
@@ -38,7 +37,6 @@ class Home extends StatelessWidget {
                 index: BlocProvider.of<HomeCubit>(context).index,
                 children: const [
                   Song(),
-                  Playlist(),
                   Album(),
                   Artist(),
                 ],

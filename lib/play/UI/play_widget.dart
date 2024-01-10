@@ -29,8 +29,6 @@ Widget playPage(BuildContext context, SongModel songModel) {
                 case MusicChangedState:
                   MusicChangedState newState = state as MusicChangedState;
                   return titleAndArtistBar(context, newState.songModel);
-                case RotationState:
-                  return titleAndArtistBar(context, songModel);
                 default:
                   return titleAndArtistBar(context, songModel);
               }
@@ -63,29 +61,24 @@ Widget playPage(BuildContext context, SongModel songModel) {
 Widget artwork(SongModel songModel, BuildContext context) {
   Size size = MediaQuery.sizeOf(context);
   ColorScheme colorScheme = Theme.of(context).colorScheme;
-  double turns = 0.0;
   return Stack(
     children: [
-      AnimatedRotation(
-        turns: BlocProvider.of<PlayCubit>(context).turns,
-        duration: const Duration(seconds: 1),
-        child: Center(
-          child: QueryArtworkWidget(
-            id: songModel.id,
-            type: ArtworkType.AUDIO,
-            size: 500,
-            quality: 100,
-            artworkBorder: BorderRadius.circular(size.width * 0.8),
-            format: ArtworkFormat.PNG,
-            artworkHeight: size.width * 0.8,
-            artworkWidth: size.width * 0.8,
-            nullArtworkWidget: Container(
-              height: size.width * 0.8,
-              width: size.width * 0.8,
-              decoration: BoxDecoration(
-                color: colorScheme.onBackground,
-                shape: BoxShape.circle,
-              ),
+      Center(
+        child: QueryArtworkWidget(
+          id: songModel.id,
+          type: ArtworkType.AUDIO,
+          size: 500,
+          quality: 100,
+          artworkBorder: BorderRadius.circular(size.width * 0.8),
+          format: ArtworkFormat.PNG,
+          artworkHeight: size.width * 0.8,
+          artworkWidth: size.width * 0.8,
+          nullArtworkWidget: Container(
+            height: size.width * 0.8,
+            width: size.width * 0.8,
+            decoration: BoxDecoration(
+              color: colorScheme.onBackground,
+              shape: BoxShape.circle,
             ),
           ),
         ),

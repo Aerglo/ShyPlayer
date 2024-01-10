@@ -45,7 +45,6 @@ dependencies:
   hive:
   hive_flutter:
   shared_preferences:
-  just_audio_background:
 
 dev_dependencies:
   flutter_test:

@@ -28,14 +28,6 @@ FlashyTabBar homeBottomNavigationBar(BuildContext context) {
       FlashyTabBarItem(
         activeColor: Theme.of(context).colorScheme.primary,
         icon: Icon(
-          Icons.queue_music,
-          color: Theme.of(context).colorScheme.secondary,
-        ),
-        title: const Text('Playlist'),
-      ),
-      FlashyTabBarItem(
-        activeColor: Theme.of(context).colorScheme.primary,
-        icon: Icon(
           Icons.album,
           color: Theme.of(context).colorScheme.secondary,
         ),
@@ -244,7 +236,8 @@ Widget playlistListWidget(
             ),
             trailing: IconButton(
               onPressed: () {
-                BlocProvider.of<PlayCubit>(context).deletePlaylist(playlistList[index].id);
+                BlocProvider.of<PlayCubit>(context)
+                    .deletePlaylist(playlistList[index].id);
               },
               icon: Icon(
                 Icons.delete,
@@ -272,14 +265,13 @@ Widget artistListWidget(BuildContext context, List<ArtistModel> artistList) {
   } else {
     return ListView.builder(
       itemCount:
-      artistList.length ~/ 3, // Change this to the number of rows you want
+          artistList.length ~/ 3, // Change this to the number of rows you want
       itemBuilder: (context, index) {
         return Row(
           children: <Widget>[
             artistTile(index * 3, context, artistList),
             artistTile(index * 3 + 1, context, artistList),
             artistTile(index * 3 + 2, context, artistList),
-
           ],
         );
       },
@@ -287,53 +279,60 @@ Widget artistListWidget(BuildContext context, List<ArtistModel> artistList) {
   }
 }
 
-Widget artistTile(int index, BuildContext context, List<ArtistModel> artistList) {
+Widget artistTile(
+    int index, BuildContext context, List<ArtistModel> artistList) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
-    child: Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(50),
-      ),
-      child: Column(
-        children: [
-          QueryArtworkWidget(
-            size: 500,
-            quality: 100,
-            format: ArtworkFormat.PNG,
-            artworkWidth: MediaQuery.sizeOf(context).width / 3 - 24,
-            artworkHeight: MediaQuery.sizeOf(context).width / 3 - 24,
-            artworkBorder: BorderRadius.circular(20),
-            id: artistList[index].id,
-            type: ArtworkType.ARTIST,
-            nullArtworkWidget: Container(
-              height: MediaQuery.sizeOf(context).width / 3 - 24,
+    child: GestureDetector(
+      onTap: () {
+        BlocProvider.of<HomeCubit>(context)
+            .onArtistTap(artistList[index], context);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(50),
+        ),
+        child: Column(
+          children: [
+            QueryArtworkWidget(
+              size: 500,
+              quality: 100,
+              format: ArtworkFormat.PNG,
+              artworkWidth: MediaQuery.sizeOf(context).width / 3 - 24,
+              artworkHeight: MediaQuery.sizeOf(context).width / 3 - 24,
+              artworkBorder: BorderRadius.circular(20),
+              id: artistList[index].id,
+              type: ArtworkType.ARTIST,
+              nullArtworkWidget: Container(
+                height: MediaQuery.sizeOf(context).width / 3 - 24,
+                width: MediaQuery.sizeOf(context).width / 3 - 24,
+                decoration: BoxDecoration(
+                  color: Get.isDarkMode
+                      ? Theme.of(context).colorScheme.background
+                      : Theme.of(context).colorScheme.onBackground,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Icon(
+                  Icons.music_note,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
               width: MediaQuery.sizeOf(context).width / 3 - 24,
-              decoration: BoxDecoration(
-                color: Get.isDarkMode
-                    ? Theme.of(context).colorScheme.background
-                    : Theme.of(context).colorScheme.onBackground,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(
-                Icons.music_note,
-                color: Theme.of(context).colorScheme.secondary,
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: MediaQuery.sizeOf(context).width / 3 - 24,
-            child: Text(
-              artistList[index].artist,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
+              child: Text(
+                artistList[index].artist,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );
@@ -370,52 +369,56 @@ Widget albumListWidget(BuildContext context, List<AlbumModel> albumList) {
 Widget albumTile(int index, BuildContext context, List<AlbumModel> albumList) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
-    child: Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(50),
-      ),
-      child: Column(
-        children: [
-          QueryArtworkWidget(
-            size: 500,
-            quality: 100,
-            format: ArtworkFormat.PNG,
-            artworkWidth: MediaQuery.sizeOf(context).width / 3 - 24,
-            artworkHeight: MediaQuery.sizeOf(context).width / 3 - 24,
-            artworkBorder: BorderRadius.circular(20),
-            id: albumList[index].id,
-            type: ArtworkType.ALBUM,
-            nullArtworkWidget: Container(
-              height: MediaQuery.sizeOf(context).width / 3 - 24,
+    child: GestureDetector(
+      onTap: () {
+        BlocProvider.of<HomeCubit>(context)
+            .onAlbumTap(albumList[index], context);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(50),
+        ),
+        child: Column(
+          children: [
+            QueryArtworkWidget(
+              size: 500,
+              quality: 100,
+              format: ArtworkFormat.PNG,
+              artworkWidth: MediaQuery.sizeOf(context).width / 3 - 24,
+              artworkHeight: MediaQuery.sizeOf(context).width / 3 - 24,
+              artworkBorder: BorderRadius.circular(20),
+              id: albumList[index].id,
+              type: ArtworkType.ALBUM,
+              nullArtworkWidget: Container(
+                height: MediaQuery.sizeOf(context).width / 3 - 24,
+                width: MediaQuery.sizeOf(context).width / 3 - 24,
+                decoration: BoxDecoration(
+                  color: Get.isDarkMode
+                      ? Theme.of(context).colorScheme.background
+                      : Theme.of(context).colorScheme.onBackground,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Icon(
+                  Icons.music_note,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
               width: MediaQuery.sizeOf(context).width / 3 - 24,
-              decoration: BoxDecoration(
-                color: Get.isDarkMode
-                    ? Theme.of(context).colorScheme.background
-                    : Theme.of(context).colorScheme.onBackground,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(
-                Icons.music_note,
-                color: Theme.of(context).colorScheme.secondary,
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: MediaQuery.sizeOf(context).width / 3 - 24,
-            child: Text(
-
-              albumList[index].album,
-
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
+              child: Text(
+                albumList[index].album,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );

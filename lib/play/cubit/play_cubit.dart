@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
 part 'play_state.dart';
@@ -19,8 +18,9 @@ class PlayCubit extends Cubit<PlayState> {
   Widget? artwork;
   Duration progress = Duration.zero;
   Duration total = Duration.zero;
+
   PlayCubit({required this.audioPlayer}) : super(PlayInitial());
-  double turns = 0.0;
+
   void initialFetch() async {
     emit(PlayFetchLoadingState());
     OnAudioQuery onAudioQuery = OnAudioQuery();
@@ -58,22 +58,16 @@ class PlayCubit extends Cubit<PlayState> {
     List<AudioSource> sources = getAllSources(songList);
     final ConcatenatingAudioSource playlist = ConcatenatingAudioSource(
       children: sources,
-
     );
     await audioPlayer.setAudioSource(
-
       playlist,
       initialIndex: index,
       initialPosition: Duration.zero,
     );
-    audioPlayer.play(
-
-    );
+    audioPlayer.play();
 
     audioPlayer.positionStream.listen((event) {
       progress = event;
-      turns += 1.0 / 360.0;
-      emit(RotationState());
       emit(DurationChangedState());
     });
     audioPlayer.durationStream.listen((event) {
@@ -135,20 +129,13 @@ class PlayCubit extends Cubit<PlayState> {
     audioPlayer.setLoopMode(mode);
     emit(DurationChangedState());
   }
+
   void deletePlaylist(int playlistId) async {
     OnAudioQuery onAudioQuery = OnAudioQuery();
     await onAudioQuery.removePlaylist(playlistId);
-    emit(PlayFetchSucceedState(
-      songList: songList,
-      playlistList: playlistList,
-      albumList: albumList,
-      artistList: artistList,
-    ));
+    initialFetch();
   }
-  void rotation(double turns) {
-    turns += 1.0 / 8.0;
-    emit(DurationChangedState());
-  }
+
   void pop() {
     initialFetch();
     emit(PlayPopButtonTappedState());
@@ -170,14 +157,9 @@ class PlayCubit extends Cubit<PlayState> {
 List<AudioSource> getAllSources(List<SongModel> songList) {
   List<AudioSource> uris = [];
   for (SongModel songModel in songList) {
-    uris.add(AudioSource.uri(Uri.parse(songModel.uri!),tag: MediaItem(
-      // Specify a unique ID for each media item:
-      id: '${songModel.id}',
-      // Metadata to display in the notification:
-      album: songModel.album,
-      title: songModel.title,
-      artUri: Uri.parse(songModel.uri!),
-    ),),);
+    uris.add(
+      AudioSource.uri(Uri.parse(songModel.uri!)),
+    );
   }
   return uris;
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 import 'package:shy_player/home/UI/home_widgets.dart';
 import 'package:shy_player/play/cubit/play_cubit.dart';
 
@@ -25,6 +26,15 @@ class Album extends StatelessWidget {
                 Expanded(
                     flex: 8,
                     child: albumListWidget(context, newState.albumList)),
+                Expanded(flex: 1, child: playingTile(context)),
+              ],
+            );
+          case DurationChangedState:
+            List<AlbumModel> albumList =
+                BlocProvider.of<PlayCubit>(context).albumList;
+            return Column(
+              children: [
+                Expanded(flex: 8, child: albumListWidget(context, albumList)),
                 Expanded(flex: 1, child: playingTile(context)),
               ],
             );

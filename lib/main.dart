@@ -2,19 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 import 'package:shy_player/play/cubit/play_cubit.dart';
 import 'package:shy_player/splash/UI/splash.dart';
 import 'package:shy_player/splash/cubit/splash_cubit.dart';
 import 'package:shy_player/themes/dark_theme.dart';
 import 'package:shy_player/themes/light_theme.dart';
 
-void main() async {
-  await JustAudioBackground.init(
-    androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
-    androidNotificationChannelName: 'Shy Player',
-    androidNotificationOngoing: true,
-  );
+void main() {
   runApp(const MyApp());
 }
 
